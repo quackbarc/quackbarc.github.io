@@ -1,0 +1,61 @@
+<html>
+<head>
+	<style>
+		body {
+			background-image: url("https://cdn.discordapp.com/attachments/497577629080092692/805890893634338876/image0-32.gif");
+			background-repeat: no-repeat;
+			background-position: center;
+			background-size: contain;
+		}
+		.s {
+			background-image: url("https://cdn.discordapp.com/attachments/497577629080092692/805890893634338876/image0-32.gif");
+			background-size: contain;
+		}
+		.cent {
+			text-align: center;
+		}
+		.thep {
+			background-color: white;
+			display: inline-block;
+			padding: 5px 10px;
+		}
+	</style>
+	</head>
+
+<body>
+	<div class="s cent">
+		<p id="what" class="thep">
+			woahh!!!!!<br>
+			look at him go 💕
+		</p>
+	</div>
+	<!-- <div style="padding: 200px;">
+	</div>
+	<div class="cent">
+		<p class="thep">
+			he's been going for a while now.<br>
+			think he needs a break
+		</p>
+	</div> -->
+	</body>
+
+<script type="text/javascript">
+
+	window.addEventListener("load", function() {
+		rainbow();
+	});
+	function sleep(ms) {
+	  return new Promise(resolve => setTimeout(resolve, ms));
+	}
+	async function rainbow() {
+		var deg = -20
+		var texto = document.getElementById('what');
+		while(true) {
+			texto.style.backgroundColor = "hsl(" + deg + "deg 100% 50%)"
+			await sleep(50);
+			deg += 5;
+		}
+	}
+
+</script>
+</html>
