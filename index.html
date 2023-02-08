@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>quackbarc.github.io</title>
+
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400&display=swap" rel="stylesheet">
+
+    <script type="text/javascript">
+        const urlList = [
+            ["light", 'url("assets/backgrounds/sketch_jessi.png")'],
+            ["light", 'url("assets/backgrounds/sketch_heaven.png")'],
+            ["light", 'url("assets/backgrounds/sketch_cassettegirl.png")'],
+            ["dark", 'url("assets/backgrounds/sketch_manupthestairs.png")'],
+        ];
+        const [theme, randomURL] = urlList[Math.floor(Math.random() * urlList.length)];
+
+        document.documentElement.setAttribute("theme", theme);
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            document.querySelector("#background")
+                .style.setProperty("--background-url", randomURL);
+        });
+    </script>
+
+    <style>
+        :root {
+            --text-color: #000;
+            --link-text-color: #06d;
+            --background-color: #fff;
+            --main-background-color: #fffd;
+            --scrollbar-color: #0012;
+            --scrollbar-hover-color: #0014;
+            --title-filter: none;
+        }
+
+        :root[theme=dark] {
+            --text-color: #eee;
+            --link-text-color: #59f;
+            --background-color: #000;
+            --main-background-color: #000d;
+            --scrollbar-color: #eef2;
+            --scrollbar-hover-color: #eef4;
+            --title-filter: invert(1);
+        }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "IBM Plex Sans Condensed", sans-serif;
+            font-weight: 400;
+
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        h1, h2, h3 {
+            font-family: "Space Grotesk", monospace;
+            margin-block-end: 0.5em;
+        }
+
+        #background {
+            background: var(--background-url);
+            background-position: right;
+            background-repeat: no-repeat;
+            background-size: auto 100%;
+            background-color: var(--background-color);
+
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        hr {
+            border-color: #9995;
+            margin: 20px 0px;
+        }
+
+        *::-webkit-scrollbar {
+            width: 4px;
+        }
+        *:hover::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-color);
+            border-radius: 0px;
+        }
+        *:hover::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-hover-color);
+            border-radius: 4px;
+        }
+
+        #mainContainer {
+            padding: 100px 400px 100px 100px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        #main {
+            overflow-y: auto;
+            max-width: 700px;
+            max-height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+
+            background-color: var(--main-background-color);
+            border-radius: 10px;
+        }
+
+        a, a:visited, a:active {
+            color: var(--link-text-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            width: 300px;
+            max-width: 100%;
+            filter: var(--title-filter);
+        }
+
+        @media (max-width: 900px) {
+            #background {
+                filter: opacity(25%);
+            }
+
+            #mainContainer {
+                padding: 60px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="background">
+    </div>
+    <div id="mainContainer">
+        <div id="main">
+            <h1><img id="grandTitle" src="assets\title.png" style="display: block"></h1>
+
+            <p>
+                If you're here for the drawing client for garyc.me/sketch,
+                <a href="https://quackbarc.github.io/sketch/">you got the URL wrong.</a>
+                If you're just curious on what else I've got on this site, I wish you luck on
+                finding anything good.
+            </p>
+
+            <p>
+                If you don't know what garyc.me/sketch is, fair warning when you do check it out.
+                It's an anarchy drawing site, so expect lewds, and things far more questionable
+                than lewds.
+            </p>
+
+            <hr>
+            <h2>garyc-related</h2>
+
+            <ul>
+                <li>
+                    <a href="https://quackbarc.github.io/sketch/">sketch</a>,
+                    a drawing client for garyc.me, forked from
+                    <a href="https://github.com/dagwaging/sketch/">dagwaging</a>.
+                </li>
+                <li>
+                    <a href="https://github.com/quackbarc/garyc-sketch-tweaks">garyc-sketch-tweaks</a>,
+                    a userscript that fixes the plethora of dumb bugs and
+                    lazy implementations on garyc.me/sketch.
+                </li>
+            </ul>
+
+            <h2>other webpages</h2>
+            I made these when I was just starting out on HTML and JS.
+
+            <ul>
+                <li>
+                    <a href="https://quackbarc.github.io/sae">sae</a>;
+                    just a funky rainbow dude dancin
+                </li>
+                <li>
+                    <a href="https://quackbarc.github.io/dump/websafe.html">websafe</a>,
+                    a calculator that finds the closest websafe color of a hex
+                    (sort of broken)
+                </li>
+            </ul>
+
+            <hr>
+
+            By the way, the background sketch changes everytime you reload :)
+            I did all of them, and I swear they're all safe for work.
+        </div>
+    </div>
+</body>
+</html>
