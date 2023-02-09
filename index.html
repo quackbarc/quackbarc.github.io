@@ -89,19 +89,18 @@
         }
 
         *::-webkit-scrollbar {
-            width: 4px;
+            width: 8px;
         }
-        *:hover::-webkit-scrollbar {
-            width: 10px;
+        /* Scrollbar styling for Firefox, as of February 2023 */
+        * {
+            scrollbar-width: thin;
         }
 
         *::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-color);
-            border-radius: 0px;
         }
         *:hover::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-hover-color);
-            border-radius: 4px;
         }
 
         #mainContainer {
