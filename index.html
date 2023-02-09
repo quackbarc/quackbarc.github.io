@@ -136,6 +136,7 @@
             width: 300px;
             max-width: 100%;
             filter: var(--title-filter);
+            pointer-events: none;
         }
 
         @media (max-width: 900px) {
@@ -156,7 +157,9 @@
     </div>
     <div id="mainContainer">
         <div id="main">
-            <h1><img id="grandTitle" src="assets\title.png" style="display: block"></h1>
+            <h1 title="someday i'll bother animating this text">
+                <img id="grandTitle" src="assets\title.png" style="display: block">
+            </h1>
 
             <p>
                 If you're here for the drawing client for garyc.me/sketch,
