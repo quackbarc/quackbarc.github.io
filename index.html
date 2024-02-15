@@ -51,6 +51,8 @@
             --scrollbar-color: #eef2;
             --scrollbar-hover-color: #eef4;
             --title-filter: invert(1);
+
+            color-scheme: dark;
         }
 
         html, body {
@@ -95,16 +97,18 @@
         *::-webkit-scrollbar {
             width: 8px;
         }
-        /* Scrollbar styling for Firefox, as of February 2023 */
-        * {
-            scrollbar-width: thin;
-        }
-
         *::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-color);
         }
         *:hover::-webkit-scrollbar-thumb {
             background-color: var(--scrollbar-hover-color);
+        }
+
+        /* Alternate scrollbar for Firefox, which only supports spec-supported scrollbar customization */
+        @supports (-moz-appearance: none) {
+            * {
+                scrollbar-width: thin;
+            }
         }
 
         #mainContainer {
