@@ -36,6 +36,7 @@
         :root {
             --text-color: #000;
             --link-text-color: #06d;
+            --kofi-link-text-color: #ff1a1a;
             --background-color: #fff;
             --main-background-color: #fffd;
             --scrollbar-color: #0012;
@@ -46,6 +47,7 @@
         :root[theme=dark] {
             --text-color: #eee;
             --link-text-color: #59f;
+            --kofi-link-text-color: #ff5f5f;
             --background-color: #000;
             --main-background-color: #000d;
             --scrollbar-color: #eef2;
@@ -134,6 +136,10 @@
             text-decoration: none;
         }
 
+        a.kofi-link {
+            color: var(--kofi-link-text-color);
+        }
+
         a:hover {
             text-decoration: underline;
         }
@@ -178,6 +184,12 @@
                 If you don't know what garyc.me/sketch is, fair warning when you do check it out.
                 It's an anarchy drawing site, so expect lewds, and things far more questionable
                 than lewds.
+            </p>
+
+            <p>
+                I also have a
+                <a class="kofi-link" href="https://ko-fi.com/quackbarc">Ko-fi</a>
+                set up if tipping people is your thing!
             </p>
 
             <hr>
