@@ -15,20 +15,20 @@
 
     <script type="text/javascript">
         const urlList = [
-            ["light", 'url("assets/backgrounds/sketch_jessi.png")'],
-            ["light", 'url("assets/backgrounds/sketch_heaven.png")'],
-            ["light", 'url("assets/backgrounds/sketch_cassettegirl.png")'],
-            ["light", 'url("assets/backgrounds/sketch_valerie_left.png")'],
-            ["light", 'url("assets/backgrounds/sketch_alex.png")'],
-            ["dark", 'url("assets/backgrounds/sketch_manupthestairs.png")'],
+            ["light", 'assets/backgrounds/sketch_jessi.png'],
+            ["light", 'assets/backgrounds/sketch_heaven.png'],
+            ["light", 'assets/backgrounds/sketch_cassettegirl.png'],
+            ["light", 'assets/backgrounds/sketch_valerie_left.png'],
+            ["light", 'assets/backgrounds/sketch_alex.png'],
+            ["dark", 'assets/backgrounds/sketch_manupthestairs.png'],
         ];
-        const [theme, randomURL] = urlList[Math.floor(Math.random() * urlList.length)];
+        const [theme, url] = urlList[Math.floor(Math.random() * urlList.length)];
 
         document.documentElement.setAttribute("theme", theme);
 
         document.addEventListener("DOMContentLoaded", (event) => {
-            document.querySelector("#background")
-                .style.setProperty("--background-url", randomURL);
+            const cssURL = `url("${url}")`;
+            document.querySelector("#background").style.setProperty("--background-url", cssURL);
         });
     </script>
 
