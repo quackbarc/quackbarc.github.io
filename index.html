@@ -29,13 +29,10 @@
             ["dark", 'assets/backgrounds/sketch_milkchan.png'],
         ];
         const [theme, url] = urlList[Math.floor(Math.random() * urlList.length)];
+        const cssURL = `url("${url}")`;
 
         document.documentElement.setAttribute("theme", theme);
-
-        document.addEventListener("DOMContentLoaded", (event) => {
-            const cssURL = `url("${url}")`;
-            document.querySelector("#background").style.setProperty("--background-url", cssURL);
-        });
+        document.documentElement.style.setProperty("--background-url", cssURL);
     </script>
 
     <style>
