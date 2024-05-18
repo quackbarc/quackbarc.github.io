@@ -51,6 +51,16 @@
                 document.querySelector("#found-text").style.display = "unset";
             }
         });
+
+        // Element event listeners
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            // Title animation
+            /** @type {HTMLImageElement} */
+            const grandTitle = document.querySelector("#grand-title");
+            grandTitle.addEventListener("pointerover", () => grandTitle.src = "assets/title_animated.gif");
+            grandTitle.addEventListener("pointerout", () => grandTitle.src = "assets/title.png");
+        });
     </script>
 
     <style>
@@ -173,7 +183,6 @@
             width: 300px;
             max-width: 100%;
             filter: var(--title-filter);
-            pointer-events: none;
         }
 
         @media (max-width: 900px) {
@@ -194,8 +203,8 @@
     </div>
     <div id="main-container">
         <main>
-            <h1 title="someday i'll bother animating this text">
-                <img id="grand-title" src="assets\title.png" style="display: block">
+            <h1>
+                <img id="grand-title" src="assets/title.png" style="display: block">
             </h1>
 
             <p>
