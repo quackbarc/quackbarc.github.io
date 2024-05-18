@@ -33,6 +33,24 @@
 
         document.documentElement.setAttribute("theme", theme);
         document.documentElement.style.setProperty("--background-url", cssURL);
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            /** @type {string[]} */
+            const foundURLs = JSON.parse(localStorage.getItem("found-bgs") || "[]");
+            const filenameStart = url.lastIndexOf("/") + 1;
+            const filename = url.slice(filenameStart);
+
+            if(!foundURLs.includes(filename)) {
+                foundURLs.push(filename);
+                localStorage.setItem("found-bgs", JSON.stringify(foundURLs));
+            }
+
+            if(foundURLs.length >= 5) {
+                document.querySelector("#found-bg-count").innerHTML = foundURLs.length.toString();
+                document.querySelector("#total-bg-count").innerHTML = urlList.length.toString();
+                document.querySelector("#found-text").style.display = "unset";
+            }
+        });
     </script>
 
     <style>
@@ -147,6 +165,10 @@
             text-decoration: underline;
         }
 
+        #found-text {
+            display: none;
+        }
+
         img#grand-title {
             width: 300px;
             max-width: 100%;
@@ -231,6 +253,14 @@
             <p>
                 By the way, the background sketch changes everytime you reload :)
                 I did all of them, and I swear they're all safe for work.
+
+                <em id="found-text">
+                    You found
+                    <span id="found-bg-count">???</span>
+                    unique ones so far! There's currently
+                    <span id="total-bg-count">???</span>
+                    of them in total.
+                </em>
             </p>
         </main>
     </div>
