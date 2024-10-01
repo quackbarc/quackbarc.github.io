@@ -39,7 +39,7 @@
         document.documentElement.setAttribute("theme", theme);
         document.documentElement.style.setProperty("--background-url", cssURL);
 
-        document.addEventListener("DOMContentLoaded", (event) => {
+        document.addEventListener("DOMContentLoaded", async (event) => {
             /** @type {string[]} */
             const foundURLs = JSON.parse(localStorage.getItem("found-bgs") || "[]");
             const filenameStart = url.lastIndexOf("/") + 1;
@@ -55,6 +55,24 @@
                 document.querySelector("#total-bg-count").innerHTML = urlList.length.toString();
                 document.querySelector("#found-text").style.display = "unset";
             }
+
+            const commitFetchURL = "https://api.github.com/repos/quackbarc/quackbarc.github.io/branches/main";
+            const commitResp = await fetch(commitFetchURL).then(r => r.json());
+            const commit = commitResp.commit;
+
+            const dateParsed = new Date(commit.commit.committer.date);
+            const date = dateParsed.toLocaleDateString("en-US", {dateStyle: "long"});
+            const shaShort = commit.sha.slice(0, 7);
+            const commitURL = commit.html_url;
+            const commitMessage = commit.commit.message;
+
+            const commitSpan = document.querySelector("#github-commit-info");
+            const commitShaA = document.createElement("a");
+            commitShaA.href = commitURL;
+            commitShaA.title = commitMessage;
+            commitShaA.textContent = shaShort;
+
+            commitSpan.innerHTML = `${date}, commit ${commitShaA.outerHTML}.`;
         });
 
         // Element event listeners
@@ -243,6 +261,11 @@
             padding-right: 8px;
         }
 
+        footer {
+            font-style: italic;
+            opacity: 70%;
+        }
+
         /* @media queries */
 
         @media (max-width: 900px) {
@@ -367,6 +390,12 @@
                     of them in total.
                 </em>
             </p>
+
+            <footer>
+                <p>
+                    Last updated on <span id="github-commit-info">...</span>
+                </p>
+            </footer>
         </main>
     </div>
 </body>
