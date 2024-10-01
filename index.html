@@ -238,6 +238,13 @@
             color: var(--background-color);
         }
 
+        #stamps > *:not(:last-child) {
+            display: inline-block;
+            padding-right: 8px;
+        }
+
+        /* @media queries */
+
         @media (max-width: 900px) {
             #background {
                 filter: opacity(25%);
@@ -279,13 +286,6 @@
                             title="it's twitter without the slop"
                             href="https://bsky.app/profile/quackbarc.bsky.social">
                             Bluesky
-                        </a>
-                    </li>
-                    <li>
-                        <a class="cohost-link"
-                            title="microblogging at its finest"
-                            href="https://cohost.org/quackbarc">
-                            Cohost
                         </a>
                     </li>
                     <li>
@@ -348,6 +348,12 @@
             </ul>
 
             <hr>
+
+            <div id="stamps">
+                <a href="https://cohost.org/quackbarc" title="microblogging was at its finest">
+                    <img src="assets/stamps/cohost.png">
+                </a>
+            </div>
 
             <p>
                 By the way, the background sketch changes everytime you reload :)
