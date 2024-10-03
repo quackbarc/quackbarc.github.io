@@ -286,6 +286,10 @@
             opacity: 70%;
         }
 
+        noscript {
+            font-family: serif;
+        }
+
         /* @media queries */
 
         @media (max-width: 900px) {
@@ -343,6 +347,17 @@
                     </li>
                 </ul>
             </header>
+
+            <noscript>
+                <p>
+                    There's supposed to be a cycle of background images going on
+                    right now, but it seems that you can't see that.
+                    You disabled JavaScript.
+                    Your punishment is a plain, white background, akin to the walls
+                    of a padded room.
+                    You are insane.
+                </p>
+            </noscript>
 
             <p>
                 If you're here for the drawing client for garyc.me/sketch,
@@ -420,7 +435,13 @@
 
             <p>
                 By the way, the background sketch changes everytime you reload :)
+                <noscript>
+                    <span>(No, it doesn't.)</span>
+                </noscript>
                 I did all of them, and I swear they're all safe for work.
+                <noscript>
+                    <span>(I worked very hard on those backgrounds.)</span>
+                </noscript>
 
                 <em id="found-text">
                     You found
@@ -434,6 +455,9 @@
             <footer>
                 <p>
                     Last updated on <span id="github-commit-info">...</span>
+                    <noscript>
+                        <span>(I'm not letting you know this part either.)</span>
+                    </noscript>
                 </p>
             </footer>
         </main>
