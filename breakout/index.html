@@ -1,0 +1,1207 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>breakout!</title>
+
+    <link href="https://fonts.cdnfonts.com/" rel="preconnect">
+    <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
+
+    <style>
+        /* Stage variables */
+
+        :root,
+        [stage="1"] {
+            --tile-color: goldenrod;
+            --tile-hover-color: darkgoldenrod;
+            --tile-hit-color: palegoldenrod;
+        }
+
+        [stage="2"] {
+            --tile-color: seagreen;
+            --tile-hover-color: #21643e;
+            --tile-hit-color: darkseagreen;
+        }
+
+        [stage="3"] {
+            --tile-color: crimson;
+            --tile-hover-color: #9a102c;
+            --tile-hit-color: lightpink;
+        }
+
+        [stage="4"] {
+            --tile-color: teal;
+            --tile-hover-color: #045e5e;
+            --tile-hit-color: cadetblue;
+        }
+
+        [stage="5"] {
+            --tile-color: slategray;
+            --tile-hover-color: slategray;
+            --tile-hit-color: silver;
+        }
+
+        [stage="6"] {
+            --tile-color: chocolate;
+            --tile-hover-color: sienna;
+            --tile-hit-color: peachpuff;
+        }
+
+        /* General styles */
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            background-color: #111;
+            color: #eee;
+            font-family: "Cascadia Code", "Consolas", monospace;
+
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        a {
+            all: unset;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* Main playarea */
+
+        main {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+
+            border: 3px solid #333;
+            border-bottom: none;
+            border-radius: 16px 16px 0 0;
+        }
+
+        /* Game elements */
+
+        #tiles {
+            /*display: grid;
+            grid-template-columns: repeat(auto-fit, 72px);
+            justify-content: center;
+            gap: 8px;*/
+
+            position: absolute;
+            top: 48px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .tile {
+            display: inline-block;
+
+            width: 72px;
+            height: 24px;
+            background-color: var(--tile-color);
+
+            margin: 3px;
+        }
+
+        .tile:hover {
+            background-color: var(--tile-hover-color);
+        }
+
+        .tile.hit {
+            background-color: var(--tile-hit-color);
+            transition: 0s opacity 0.1s;
+            opacity: 0%;
+        }
+
+        #ball {
+            width: 16px;
+            height: 16px;
+            border-radius: 100%;
+            background-color: #fff;
+
+            position: absolute;
+            bottom: 54px;
+            left: calc((100% - 16px) / 2);
+
+            z-index: 10;
+        }
+
+        #paddle-line {
+            position: absolute;
+            bottom: 16px;  /* same as #paddle's `bottom` */
+            width: 100%;
+
+            border: 2px dashed #333;
+
+            z-index: 10;
+        }
+
+        #paddle {
+            position: absolute;
+            bottom: 16px;
+            left: calc((100% - 120px) / 2);
+
+            width: 120px;
+            height: 24px;
+            background-color: crimson;
+
+            z-index: 20;
+        }
+
+        #crank {
+            position: absolute;
+            bottom: 72px;
+            left: calc((100% - 60px) / 2);
+
+            cursor: grab;
+            touch-action: none;
+
+            z-index: 20;
+        }
+
+        #crank svg {
+            color: #aaa;
+            transition: 0.2s color;
+        }
+
+        #crank:active,
+        #crank[holding] {
+            /**
+             * "[holding]" is for mobile; ":active" is for noscript.
+             * Desktop can use either.
+             */
+            cursor: grabbing;
+        }
+
+        #crank:active svg,
+        #crank[holding] svg {
+            color: #ddd;
+            transition: none;
+            animation: 0.5s stroke-fade 4s forwards;
+        }
+
+        #crank:active #knob,
+        #crank[holding] #knob {
+            r: 4px;
+        }
+
+        /* Menu elements */
+
+        .dialog {
+            position: absolute;
+            inset: 0;
+            top: 32px;
+            width: fit-content;
+            height: fit-content;
+            margin: auto;
+            box-sizing: border-box;
+
+            background-color: #111b;
+            padding: 1.5rem 2rem;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+
+            z-index: 50;
+        }
+
+        .subdialog {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dialog:not(.show),
+        .subdialog:not(.show) {
+            display: none;
+        }
+
+        #opening-menu ul {
+            text-align: left;
+        }
+
+        #opening-menu > .title {
+            font-size: 72px;
+            font-weight: bold;
+        }
+
+        #opening-menu > .title span {
+            display: inline-block;
+        }
+
+        #opening-menu:has(#pre-start.show) {
+            background-color: transparent;
+            transition: 0.5s background-color 1.5s ease-out;
+            pointer-events: none;
+        }
+
+        #opening-menu.hiding > .title span {
+            animation: 0.3s title-fade steps(3, start) forwards;
+        }
+
+        #opening-menu.hiding > :not(.title) {
+            visibility: hidden;
+        }
+
+        #pre-start {
+            margin-top: 20px;
+        }
+
+        #pre-start > :not(.regular-stage-text) {
+            display: none;
+        }
+
+        #pre-start span.hide {
+            visibility: hidden;
+        }
+
+        [stage="2"] #pre-start .regular-stage-text,
+        [stage="5"] #pre-start .regular-stage-text {
+            display: none;
+        }
+
+        [stage="2"] #pre-start .stage-2-text,
+        [stage="5"] #pre-start .stage-5-text {
+            display: unset;
+        }
+
+        #pause-menu,
+        #closing-menu-win,
+        #closing-menu-lose {
+            gap: 8px;
+        }
+
+        /* Other UI elements */
+
+        #top-toasts {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            padding: 16px 24px;
+
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+
+            z-index: 10;
+            user-select: none;
+        }
+
+        #top-toasts > .can-override:not(.show) {
+            display: none;
+        }
+
+        #top-toasts:has(.can-override.show) > :not(.can-override.show) {
+            display: none;
+        }
+
+        #stage-info:not(.show) {
+            display: none;
+        }
+
+        #oob-toast {
+            position: absolute;
+            top: 32px;
+            height: calc(100% - 32px);
+            width: 100%;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            color: #999;
+            user-select: none;
+            z-index: 10;
+        }
+
+        #oob-toast:not(.show) {
+            display: none;
+        }
+
+        #version-toast {
+            position: absolute;
+            bottom: 0px;
+            right: 16px;
+
+            color: #666;
+            user-select: none;
+            text-align: right;
+        }
+
+        #version-toast:not(.show) {
+            display: none;
+        }
+
+        /* Animation @keyframes */
+
+        @keyframes stage-2-fade-in {
+            0% {
+                opacity: 0%;
+            }
+
+            100% {
+                opacity: 100%;
+            }
+        }
+
+        @keyframes title-fade {
+            0% {
+                opacity: 100%;
+            }
+
+            100% {
+                opacity: 0%;
+            }
+        }
+
+        @keyframes stroke-fade {
+            0% {
+                color: #ddd;
+            }
+
+            100% {
+                color: #ddd5;
+            }
+        }
+
+        /* @media queries */
+
+        @media (max-width: 480px) {
+            #opening-menu > .title {
+                font-size: 48px;
+                text-overflow: clip;
+            }
+        }
+    </style>
+
+    <noscript>
+        <style>
+            .js-only {
+                display: none;
+            }
+
+            #ball {
+                display: none;
+            }
+
+            #paddle {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            #crank:active svg {
+                /* Hide the fade-while-holding-crank animation */
+                animation: none;
+            }
+        </style>
+    </noscript>
+
+    <script>
+        // @ts-check
+
+        // Constants
+        // Internal game mechanics
+        // Leaving `firstFrameTimestamp` and `lastFrame` as both null
+        // should be the canonical way to indicate a game end
+
+        const fps = 60;
+        /* @param {number?} */
+        let firstFrameTimestamp = null;
+        /* @param {number?} */
+        let lastFrame = null;
+
+        // Will be true from the moment the user presses space to start
+        // up until the game gets reset.
+        let started = false;
+
+        let noHitStreak = -1;
+
+        // Constants
+        // Game elements
+
+        let stage = 1;
+        let score = 0;
+        let zenMode = false;
+        let paused = false;
+
+        // Speed per axis, in pixels per frame
+        const ibsStages = [2, 3, 4, 5];
+        const mbsStages = [5, 6, 7, 8, 9];
+        let initialBallSpeed = ibsStages[0];
+        let maxBallSpeed = mbsStages[0];
+        let ballSpeed = initialBallSpeed;
+        let ballTilt = 1;
+
+        // Distance per crank rotation, in pixels
+        const pspeedStages = [20, 20, 20, 25, 30];
+        let paddleCrankSpeed = pspeedStages[0];
+
+        // Pixels (paddle width)
+        // Only accessed on element prep, so we don't need
+        // a global `paddleWidth` variable for this.
+        const pwidthStages = [120, 100, 80, 60];
+
+        let crankLock = false;
+
+        // Utility functions
+
+        /**
+         * @param {number} ms
+         */
+        function sleep(ms) {
+            return new Promise((res, rej) => setTimeout(res, ms));
+        }
+
+        // Crank functions
+
+        /** @param {PointerEvent} event */
+        function crankDown(event) {
+            event.preventDefault();
+
+            if(crankLock) {
+                return;
+            }
+
+            /** @type {HTMLDivElement} */
+            const crank = this;
+            crank.setPointerCapture(event.pointerId);
+            crank.toggleAttribute("holding", true);
+            setCrank(event.clientX, event.clientY);
+        }
+
+        /** @param {PointerEvent} event */
+        function crankMove(event) {
+            if(crankLock) {
+                // In case locking happens when the crank's already held down
+                return;
+            }
+
+            /** @type {HTMLDivElement} */
+            const crank = this;
+            const holding = crank.hasAttribute("holding");
+            if(!holding) {
+                return;
+            }
+
+            setCrank(event.clientX, event.clientY);
+        }
+
+        /** @param {PointerEvent} event */
+        function crankUp(event) {
+            /** @type {HTMLDivElement} */
+            const crank = this;
+            crank.releasePointerCapture(event.pointerId);
+            crank.toggleAttribute("holding", false);
+        }
+
+        /**
+         * @param {number} x
+         * @param {number} y
+         */
+        function setCrank(x, y) {
+            const crank = document.querySelector("#crank");
+
+            const {left, top, width, height} = crank.getBoundingClientRect();
+            const angle = -Math.atan2(  // note the -; Y axis is flipped
+                left + (width / 2) - x,
+                top + (height / 2) - y,
+            );
+            const lastAngleAttr = crank.getAttribute("angle");
+
+            if(lastAngleAttr) {
+                const lastAngle = parseFloat(lastAngleAttr);
+                const diff = lastAngle - angle;
+
+                let clampedDiff = diff;
+                if(Math.abs(diff) >= Math.PI) {
+                    clampedDiff += Math.PI*2 * (diff < 0 ? 1 : -1);
+                }
+
+                movePaddle(clampedDiff);
+            }
+
+            const svg = crank.querySelector("svg");
+            svg.style.rotate = `${angle}rad`;
+            crank.setAttribute("angle", angle.toString());
+        }
+
+        // Game element functions
+
+        /** @param {number} crankdelta */
+        function movePaddle(crankdelta) {
+            const playarea = document.querySelector("main");
+
+            /** @type {HTMLDivElement} */
+            const paddle = document.querySelector("#paddle");
+            const paddlePos = parseFloat(paddle.style.left.slice(0, -2));
+            const paddleMax = playarea.clientWidth - paddle.clientWidth;
+
+            let newpos = paddlePos - (crankdelta / Math.PI * 2) * paddleCrankSpeed;
+            newpos = Math.min(paddleMax, Math.max(0, newpos));
+
+            paddle.style.left = `${newpos}px`;
+        }
+
+        function showHighscore() {
+            /** @type {HTMLSpanElement} */
+            const highscoreSpan = document.querySelector("#high-score-info");
+            const records = JSON.parse(localStorage.getItem("breakout-records"));
+            if(records) {
+                const highscore = records.highscore;
+                const highscoreStage = records.highscoreStage;
+                const highscoreDate = new Date(records.highscoreDate);
+
+                const show = records.highscore > 0;
+                let highscoreHTML = "&starf; ";
+
+                if(highscoreStage >= 2) {
+                    highscoreHTML += `${highscoreStage} &blacktriangleright; ${highscore}`;
+                }
+                else {
+                    highscoreHTML += highscore.toString();
+                }
+
+                highscoreSpan.title = highscoreDate.toLocaleString();
+                highscoreSpan.innerHTML = highscoreHTML;
+                highscoreSpan.classList.toggle("show", show);
+            }
+        }
+
+        // Game state functions
+
+        function saveRecords() {
+            if(score == 0) {
+                return;
+            }
+
+            const storedRecords = JSON.parse(localStorage.getItem("breakout-records"));
+            const defaultRecords = {
+                highscore: 0,
+                highscoreStage: 1,
+                highscoreDate: null,
+                plays: 0,
+            }
+            const records = {...defaultRecords, ...storedRecords};
+
+            if(!zenMode && score > records.highscore) {
+                records.highscore = score;
+                records.highscoreStage = stage;
+                records.highscoreDate = Date.now();
+            }
+
+            // I'm pretty optimistic that it's only gonna be gamelose()
+            // calling this function
+            records.plays += 1;
+
+            localStorage.setItem("breakout-records", JSON.stringify(records));
+            return records;
+        }
+
+        // Main game functions
+
+        /**
+         * @param {DOMHighResTimeStamp} timestamp
+         */
+        function tick(timestamp) {
+            // Frame management
+
+            if(firstFrameTimestamp == null) {
+                lastFrame = 0;
+                firstFrameTimestamp = timestamp;
+                return window.requestAnimationFrame(tick);
+            }
+
+            const frame = Math.floor((timestamp - firstFrameTimestamp) * fps / 1000);
+            const frames = frame - lastFrame;
+            if(frames == 0) {
+                return window.requestAnimationFrame(tick);
+            }
+
+            lastFrame = frame;
+
+            // Early returns
+
+            if(paused) {
+                firstFrameTimestamp = null;
+                lastFrame = null;
+                return;
+            }
+
+            // Movement
+
+            /** @type {HTMLDivElement} */
+            const oobElem = document.querySelector("#oob-toast");
+            const oobCountElem = document.querySelector("#oob-distance");
+
+            /** @type {HTMLDivElement} */
+            const ball = document.querySelector("#ball");
+            const ballX = parseFloat(ball.getAttribute("x"));
+            const ballY = parseFloat(ball.getAttribute("y"));
+            const ballXDir = parseInt(ball.getAttribute("xdir"));
+            const ballYDir = parseInt(ball.getAttribute("ydir"));
+
+            ballSpeed = Math.min(ballSpeed + (0.01 * frames), maxBallSpeed);
+
+            let newBallX = ballX + (ballSpeed * frames * ballXDir);
+            let newBallY = ballY + (ballSpeed * frames * ballYDir) * ballTilt;
+            let newBallXDir = ballXDir;
+            let newBallYDir = ballYDir;
+
+            const ballTop = ball.offsetTop;
+            const ballLeft = ball.offsetLeft;
+            const ballRight = ball.offsetLeft + ball.offsetWidth;
+            const ballBottom = ball.offsetTop + ball.offsetHeight;
+
+            /** @type {HTMLDivElement} */
+            const paddle = document.querySelector("#paddle");
+            /** @type {HTMLDivElement} */
+            const tileHolder = document.querySelector("#tiles");
+            const top = tileHolder.offsetTop;
+            /** @type {HTMLDivElement[]} */
+            const tiles = [
+                // @ts-ignore
+                ...tileHolder.querySelectorAll(".tile:not(.hit)"),
+                // @ts-ignore
+                paddle,
+            ];
+            let closest = null;
+            let closestDist = -Infinity;
+            let xHit = false;
+            let yHit = false;
+            let deflectXTo = null;
+            let deflectYTo = null;
+
+            for(const ind in tiles) {
+                const tile = tiles[ind];
+
+                let extraTop = 0;
+                if(tile.classList.contains("tile")) {
+                    extraTop = top;
+                }
+
+                const tileTop = tile.offsetTop + extraTop;
+                const tileLeft = tile.offsetLeft;
+                const tileRight = tile.offsetLeft + tile.offsetWidth;
+                const tileBottom = tile.offsetTop + tile.offsetHeight + extraTop;
+
+                if(
+                    (ballTop < tileBottom)
+                    && (ballBottom > tileTop)
+                    && (ballLeft < tileRight)
+                    && (ballRight > tileLeft)
+                ) {
+                    const offsetT = ballTop - tileBottom;
+                    const offsetB = tileTop - ballBottom;
+                    const offsetL = ballLeft - tileRight;
+                    const offsetR = tileLeft - ballRight;
+                    const offsetMin = Math.min(offsetT, offsetB, offsetL, offsetR);
+                    if(offsetMin > closestDist) {
+                        closest = ind;
+                        closestDist = offsetMin;
+                        xHit = (ballRight > tileRight) || (ballLeft < tileLeft);
+                        yHit = (ballBottom > tileBottom) || (ballTop < tileTop);
+
+                        if(ballRight > tileRight)   {newBallXDir = 1}
+                        if(ballLeft < tileLeft)     {newBallXDir = -1}
+                        if(ballBottom > tileBottom) {newBallYDir = -1}
+                        if(ballTop < tileTop)       {newBallYDir = 1}
+                    }
+                }
+            }
+
+            if(closest) {
+                /** @type {HTMLDivElement} */
+                const clashedElem = tiles[closest];
+
+                if(clashedElem.classList.contains("tile")) {
+                    clashedElem.classList.add("hit");
+
+                    noHitStreak = -1;   // turns into 0 on paddle hit
+                    score += 10 * stage;
+                    document.querySelector("#score").textContent = score.toString();
+                }
+
+                if(clashedElem === paddle) {
+                    const paddleMid = paddle.offsetLeft + (paddle.offsetWidth / 2);
+                    const ballMid = ball.offsetLeft + (ball.offsetWidth / 2);
+                    newBallXDir = paddleMid < ballMid ? 1 : -1;
+
+                    noHitStreak += 1;
+
+                    if(noHitStreak >= 10) {
+                        const tiltFactor = Math.max(noHitStreak - 9, 0) * 0.05;
+                        ballTilt = 1 - Math.min(tiltFactor, 0.5);
+                    }
+                    else {
+                        ballTilt = 1;
+                    }
+                }
+
+                // Not very accurate collision correction, but it's fine enough.
+                if(xHit) {
+                    newBallX = ballX + (ballSpeed * frames * newBallXDir);
+                }
+                if(yHit) {
+                    newBallY = ballY + (ballSpeed * frames * newBallYDir);
+                }
+            }
+
+            const playarea = document.querySelector("main");
+            const playareaTop = 0;
+            const playareaLeft = 0;
+            const playareaBottom = playarea.clientHeight;
+            const playareaRight = playarea.clientWidth;
+
+            const pLeftHit = (ballLeft < playareaLeft);
+            const pRightHit = (ballRight > playareaRight);
+            const pTopHit = (ballTop < playareaTop);
+            const pBottomHit = (ballBottom > playareaBottom);
+
+            // Same correction as above.
+            if(pLeftHit) {
+                newBallXDir = 1;
+                newBallX = ballX + (ballSpeed * frames * newBallXDir);
+            }
+            if(pRightHit) {
+                newBallXDir = -1;
+                newBallX = ballX + (ballSpeed * frames * newBallXDir);
+            }
+            if(pTopHit) {
+                newBallYDir = -1;
+                newBallY = ballY + (ballSpeed * frames * newBallYDir);
+            }
+
+            const outOfBoundsDist = Math.min(
+                0,
+                playareaRight - ballRight,
+                playareaBottom - ballBottom,
+                ballLeft - playareaLeft,
+                ballTop - playareaTop,
+            ) * -1;
+            const showOOB = outOfBoundsDist >= 50;
+
+            const middle = Math.round((playarea.clientWidth - ball.clientWidth) / 2);
+
+            ball.setAttribute("x", newBallX.toString());
+            ball.setAttribute("y", newBallY.toString());
+            ball.setAttribute("xdir", newBallXDir.toString());
+            ball.setAttribute("ydir", newBallYDir.toString());
+            ball.style.left = `${newBallX + middle}px`;
+            ball.style.bottom = `${newBallY}px`;
+
+            if(showOOB && !pBottomHit) {
+                const oobETA = outOfBoundsDist / (ballSpeed * fps);
+                oobCountElem.textContent = `${oobETA.toFixed(1)}`;
+                oobElem.classList.add("show");
+            }
+            else {
+                oobElem.classList.remove("show");
+            }
+
+            // Game end rules
+
+            const untouchedTile = document.querySelector(".tile:not(.hit)")
+            if(!untouchedTile) {
+                setTimeout(gamewin, 1000);
+                firstFrameTimestamp = null;
+                return;
+            }
+
+            if(pBottomHit) {
+                gamelose();
+                firstFrameTimestamp = null;
+                return;
+            }
+
+            // Tick end
+
+            window.requestAnimationFrame(tick);
+        }
+
+        async function gamestart() {
+            const highscoreSpan = document.querySelector("#high-score-info");
+            const openingMenu = document.querySelector("#opening-menu");
+            const omIdle = openingMenu.querySelector("#idle");
+            const omPrestart = openingMenu.querySelector("#pre-start");
+            const versionSpan = document.querySelector("#version-toast");
+
+            highscoreSpan.classList.remove("show");
+            omIdle.classList.remove("show");
+            omPrestart.classList.add("show");
+            versionSpan.classList.remove("show");
+
+            if(stage == 2 || stage == 5) {
+                const selector = `.stage-${stage}-text`;
+                const prestartStageTexts = omPrestart.querySelectorAll(selector);
+
+                prestartStageTexts.forEach((span, ind) => {
+                    if(ind >= 1) {
+                        span.classList.add("hide");
+                        setTimeout(() => span.classList.remove("hide"), 1250);
+                    }
+                });
+
+                await sleep(500);
+            }
+
+            await sleep(2000);
+            openingMenu.classList.add("hiding");
+
+            await sleep(700);
+            openingMenu.classList.remove("show");
+
+            started = true;
+            window.requestAnimationFrame(tick);
+        }
+
+        function gamepause() {
+            const pauseMenu = document.querySelector("#pause-menu");
+            pauseMenu.classList.add("show");
+
+            paused = true;
+            crankLock = true;
+        }
+
+        function gameunpause() {
+            const pauseMenu = document.querySelector("#pause-menu");
+            pauseMenu.classList.remove("show");
+
+            paused = false;
+            crankLock = false;
+
+            firstFrameTimestamp = null;
+            lastFrame = null;
+            window.requestAnimationFrame(tick);
+        }
+
+        function gamelose() {
+            const closingMenu = document.querySelector("#closing-menu-lose");
+            closingMenu.classList.add("show");
+
+            crankLock = true;
+
+            saveRecords();
+        }
+
+        function gamewin() {
+            const closingMenu = document.querySelector("#closing-menu-win");
+            closingMenu.classList.add("show");
+
+            crankLock = true;
+        }
+
+        function gamerestart() {
+            score = 0;
+            stage = 1;
+        }
+
+        function gamecontinue() {
+            if(!zenMode) {
+                stage += 1;
+            }
+        }
+
+        function gamereset() {
+            const openingMenu = document.querySelector("#opening-menu");
+            const omIdle = openingMenu.querySelector("#idle");
+            const omPrestart = openingMenu.querySelector("#pre-start");
+            const playarea = document.querySelector("main");
+            /** @type {HTMLDivElement} */
+            const ball = document.querySelector("#ball");
+            /** @type {HTMLDivElement} */
+            const paddle = document.querySelector("#paddle");
+            const tileHolder = document.querySelector("#tiles");
+            const stageInfoSpan = document.querySelector("#stage-info");
+            const stageSpan = document.querySelector("#stage-count");
+            const scoreSpan = document.querySelector("#score");
+            const versionSpan = document.querySelector("#version-toast");
+
+            // Revert game-end states
+
+            document.querySelectorAll(".dialog").forEach((elem) => {
+                elem.classList.remove("show");
+            });
+
+            openingMenu.classList.add("show");
+            openingMenu.classList.remove("hiding");
+            omIdle.classList.add("show");
+            omPrestart.classList.remove("show");
+
+            firstFrameTimestamp = null;
+            lastFrame = null;
+            started = false;
+            noHitStreak = -1;
+            paused = false;
+            ballTilt = 1;
+            crankLock = false;
+
+            // Setup stage-specific states
+
+            /**
+             * @param {number} n
+             * @param {array} arr
+             */
+            function getStageValue(n, arr) {
+                return arr[Math.min(stage - 1, arr.length - 1)];
+            }
+
+            initialBallSpeed    = getStageValue(stage, ibsStages);
+            maxBallSpeed        = getStageValue(stage, mbsStages);
+            paddleCrankSpeed    = getStageValue(stage, pspeedStages);
+            ballSpeed = initialBallSpeed;
+
+            // Setup game elements
+
+            const tcStageMin = (stage - 1) * 5;
+            const tcMin = 10 + tcStageMin;
+            const tcMax = 60;
+            const tilecount = Math.floor(Math.random() * (tcMax - tcMin + 1)) + tcMin;
+
+            const newtiles = [];
+            for(let i = 0; i < tilecount; i++) {
+                const tile = document.createElement("div");
+                tile.classList.add("tile");
+                newtiles.push(tile);
+            }
+            tileHolder.replaceChildren(...newtiles);
+
+            const ballXDir = Math.random() < 0.5 ? -1 : 1;
+            const ballY = 54;
+            const bMiddle = Math.round((playarea.clientWidth - ball.clientWidth) / 2);
+
+            ball.setAttribute("x", "0");
+            ball.setAttribute("y", ballY.toString());
+            ball.setAttribute("xdir", ballXDir.toString());
+            ball.setAttribute("ydir", "-1");
+            ball.style.left = `${bMiddle}px`;
+            ball.style.bottom = `${ballY}px`;
+
+            const paddleWidth = getStageValue(stage, pwidthStages);
+            const pMiddle = Math.round((playarea.clientWidth - paddleWidth) / 2);
+
+            paddle.style.width = `${paddleWidth}px`;
+            paddle.style.left = `${pMiddle}px`;
+
+            scoreSpan.textContent = score.toString();
+            stageSpan.textContent = stage.toString();
+            stageInfoSpan.classList.toggle("show", stage >= 2);
+
+            if(zenMode) {
+                stageSpan.innerHTML = "&infin;";
+                stageInfoSpan.classList.add("show");
+            }
+
+            showHighscore();
+
+            versionSpan.classList.add("show");
+
+            const stageStyleCount = 6;
+            const stageStyle = (stage - 1) % stageStyleCount + 1;
+            playarea.setAttribute("stage", stageStyle.toString());
+        }
+
+        async function main() {
+            // Initial element setup
+
+            const openingMenu = document.querySelector("#opening-menu");
+            const openingMenuTitle = openingMenu.querySelector(".title");
+            const title = openingMenuTitle.textContent;
+            const titleSpans = [];
+            for(const char of title) {
+                const titleSpan = document.createElement("span");
+                const delaySpeed = 0.3 / 3;
+                const delay = Math.floor(Math.random() * 2) * delaySpeed;
+                titleSpan.textContent = char;
+                titleSpan.style.animationDelay = `${delay}s`;
+                titleSpans.push(titleSpan);
+            }
+            openingMenuTitle.replaceChildren(...titleSpans);
+
+            const playAgainButtons = document.querySelectorAll("button.play-again");
+            for(const button of playAgainButtons) {
+                button.addEventListener("click", () => {
+                    gamerestart();
+                    gamereset();
+                    gamestart();
+                });
+            }
+
+            const continueButton = document.querySelector("button.continue");
+            continueButton.addEventListener("click", () => {
+                gamecontinue();
+                gamereset();
+                gamestart();
+            });
+
+            const unpauseButton = document.querySelector("button.unpause");
+            unpauseButton.addEventListener("click", gameunpause);
+
+            const startButton = document.querySelector("button.start");
+            startButton.addEventListener("click", gamestart);
+
+            // Initial game element setup
+
+            gamerestart();
+            gamereset();
+
+            /** @type {HTMLDivElement} */
+            const crank = document.querySelector("#crank");
+
+            crank.addEventListener("pointerdown", crankDown);
+            crank.addEventListener("pointerup", crankUp);
+            crank.addEventListener("pointermove", crankMove);
+
+            // Document event handler setup
+
+            document.addEventListener("keydown", (event) => {
+                switch(event.key) {
+                    case " ": {
+                        const running = firstFrameTimestamp !== null;
+
+                        if(paused) {
+                            event.preventDefault();
+                            gameunpause();
+                            break;
+                        }
+                        if(running) {
+                            event.preventDefault();
+                            gamepause();
+                            break;
+                        }
+                        if(!started) {
+                            event.preventDefault();
+                            gamestart();
+                            break;
+                        }
+
+                        /** @type {HTMLButtonElement?} */
+                        const openedDialogButton = document.querySelector(".dialog.show button");
+                        if(openedDialogButton) {
+                            event.preventDefault();
+                            openedDialogButton.click();
+                            break;
+                        }
+                    }
+                }
+            });
+
+            window.addEventListener("resize", () => {
+                // Game element repositioning
+                // The ball usually gets repositioned on `tick()`, but this is
+                // for then times when tick() isn't running, e.g. on init.
+
+                const playarea = document.querySelector("main");
+                /** @type {HTMLDivElement} */
+                const ball = document.querySelector("#ball");
+                const ballX = parseFloat(ball.getAttribute("x"));
+                const ballY = parseFloat(ball.getAttribute("y"));
+                const bMiddle = Math.round((playarea.clientWidth - ball.clientWidth) / 2);
+                ball.style.left = `${bMiddle + ballX}px`;
+                ball.style.bottom = `${ballY}px`;
+
+                movePaddle(0);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", main);
+    </script>
+</head>
+<body>
+    <main id="playarea">
+        <div id="crank">
+            <svg
+                id="crank-svg"
+                width="60px"
+                height="80px"
+                viewbox="0 0 60 60"
+                xmlns="http://www.w3.org/2000/svg"
+                stroke="currentColor"
+                stroke-width="4px"
+                fill="#0000">
+                <g>
+                    <circle cx="30" cy="30" r="26"/>
+                    <path d="M 30 30 v -18"/>
+                    <circle cx="30" cy="-4" r="3" fill="currentColor" stroke="none" id="knob"/>
+                </g>
+            </svg>
+        </div>
+
+        <div id="tiles"></div>
+        <div id="ball"></div>
+        <div id="paddle"></div>
+        <hr id="paddle-line">
+
+        <div id="top-toasts">
+            <span id="high-score-info" class="can-override">&starf;</span>
+            <span id="stage-info">
+                <span id="stage-count">1</span>
+                <span>&blacktriangleright;</span>
+            </span>
+            <span id="score">0</span>
+        </div>
+
+        <div id="oob-toast">
+            <span>
+                ball is currently out of bounds.<br>
+                it comes back in <span id="oob-distance">?</span>s.
+            </span>
+        </div>
+
+        <div id="version-toast">
+            <span>
+                v1.0.0
+                <a href="https://quackbarc.github.io" target="_blank">@quackbarc</a>
+            </span>
+        </div>
+
+        <div id="opening-menu" class="dialog show">
+            <span class="title">BREAKOUT</span>
+            <span>with a crank</span>
+            <div id="idle" class="subdialog show">
+                <ul>
+                    <li>move the crank to control the paddle</li>
+                    <li>press space to start or pause</li>
+                </ul>
+                <div class="js-only">
+                    <button class="start">start</button>
+                </div>
+                <noscript>
+                    you must enable javascript
+                </noscript>
+            </div>
+            <div id="pre-start" class="subdialog">
+                <span class="regular-stage-text">get ready</span>
+                <span class="stage-2-text">the ball gets faster every round</span>
+                <span class="stage-2-text">get ready</span>
+                <span class="stage-5-text">the ball is as fast as it can go</span>
+                <span class="stage-5-text">good luck</span>
+            </div>
+        </div>
+        <div id="pause-menu" class="dialog">
+            <span>paused</span>
+            <button class="unpause">i'm back</button>
+            <button class="play-again">can i start over this run sucked</button>
+        </div>
+        <div id="closing-menu-win" class="dialog">
+            <span>you've winned</span>
+            <button class="continue">that's awesome</button>
+        </div>
+        <div id="closing-menu-lose" class="dialog">
+            <span>you've losed</span>
+            <button class="play-again">DAMN!</button>
+        </div>
+    </main>
+</body>
+</html>
