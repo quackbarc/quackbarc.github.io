@@ -319,6 +319,23 @@
             }
         }
 
+
+        @media (max-width: 480px) {
+            .gallery {
+                grid-template-columns: auto;
+                gap: 8px;
+                margin: 1.2em 0;
+            }
+
+            .gallery > :nth-child(2n) {
+                margin-bottom: 0.8em;
+            }
+
+            .gallery img {
+                width: 100%;
+            }
+        }
+
         @media not all and (hover: hover) {
             ul#social-links a {
                 text-decoration: underline;
