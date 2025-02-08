@@ -298,10 +298,6 @@
             opacity: 70%;
         }
 
-        noscript {
-            font-family: serif;
-        }
-
         /* @media queries */
 
         @media (max-width: 900px) {
@@ -342,6 +338,15 @@
             }
         }
     </style>
+
+    <noscript>
+        <style>
+            .js-only {
+                text-decoration: line-through;
+                opacity: 50%;
+            }
+        </style>
+    </noscript>
 </head>
 <body>
     <div id="background">
@@ -384,23 +389,19 @@
                 </ul>
             </header>
 
-            <noscript>
-                <p>
-                    There's supposed to be a cycle of background images going on
-                    right now, but it seems that you can't see that.
-                    You disabled JavaScript.
-                    Your punishment is a plain, white background, akin to the walls
-                    of a padded room.
-                    You are insane.
-                </p>
-            </noscript>
-
             <p>
                 If you're here for the drawing client for garyc.me/sketch,
                 <a href="https://quackbarc.github.io/sketch/">you got the URL wrong.</a>
                 If you're just curious on what else I've got on this site, I wish you luck on
                 finding anything good.
             </p>
+
+            <noscript>
+                <p>
+                    Most of the projects require JavaScript enabled,
+                    so it might be a good idea to turn that on first.
+                </p>
+            </noscript>
 
             <hr>
             <h2>garyc-related</h2>
@@ -495,13 +496,16 @@
             </div>
 
             <p>
-                By the way, the background sketch changes everytime you reload!
+                <span class="js-only">
+                    By the way, the background sketch changes everytime you reload!
+                    I did all of them, and I swear they're all safe for work.
+                </span>
                 <noscript>
-                    <span>(No, it doesn't.)</span>
-                </noscript>
-                I did all of them, and I swear they're all safe for work.
-                <noscript>
-                    <span>(I worked very hard on those backgrounds.)</span>
+                    <span>
+                        The nothingness will get to you.
+                        Like a padded room, you'll eventually go out of your mind.
+                        You HAVE to enable JavaScript.
+                    </span>
                 </noscript>
 
                 <em id="found-text">
@@ -514,11 +518,8 @@
             </p>
 
             <footer>
-                <p>
+                <p class="js-only">
                     Last updated on <span id="github-commit-info">...</span>
-                    <noscript>
-                        <span>(I'm not letting you know this part either.)</span>
-                    </noscript>
                 </p>
             </footer>
         </main>
